@@ -593,7 +593,7 @@ class Agent(object):
         ILtime = 1
         Learning_flag = 0 # when Learning_flag==0 IL when Learning_flag == 1 RL
         IMLtime =0        # Imition Learning time
-        IMLtimemax = 5000000    # Max Imition Learning time
+        IMLtimemax = 2    # Max Imition Learning time
         try:
             while self.step < nb_steps:
                 '''

@@ -16,7 +16,8 @@ from rl.memory import SequentialMemory
 
 import tensorflow as tf
 nowtime = time.strftime("%y_%m_%d_%H",time.localtime())
-ENV_NAME = 'discrete-action-uav-stable-2d-v0'
+ENV_NAME = 'discrete-action-uav-dynamical-2d-v0'
+# ENV_NAME = 'discrete-action-uav-stable-2d-v0'
 
 if not os.path.exists(ENV_NAME+'-'+nowtime):
     os.mkdir(ENV_NAME+'-'+nowtime)
@@ -72,25 +73,29 @@ def Given_policy(env, policy, now):
 
 observation_input = Input(shape=(1,) + env.observation_space.shape, name='observation_input')
 flattened_observation = Flatten()(observation_input)
+x = Dense(1024,
+          kernel_regularizer=regularizers.l2(0.01),
+          bias_regularizer=regularizers.l2(0.01))(flattened_observation)
+x = Activation('relu')(x)
+x = Dense(512,
+          kernel_regularizer=regularizers.l2(0.01),
+          bias_regularizer=regularizers.l2(0.01))(flattened_observation)
+x = Activation('relu')(x)
 x = Dense(256,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(flattened_observation)
+x = Activation('relu')(x)
+x = Dense(256,
+          kernel_regularizer=regularizers.l2(0.1),
+          bias_regularizer=regularizers.l2(0.1))(flattened_observation)
 x = Activation('relu')(x)
 x = Dense(128,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(x)
 x = Activation('relu')(x)
-x = Dense(128,
-          kernel_regularizer=regularizers.l2(1),
-          bias_regularizer=regularizers.l2(1))(x)
-x = Activation('relu')(x)
-xv = Dense(nb_actions)(x)
-x_v = Activation('linear')(xv)
-xa = Dense(nb_actions)(x)
-x_a = Activation('linear')(xa)
-x_a = x_a - tf.reduce_mean(x_a,axis=1)
-xout = Subtract()([x_v,x_a])
-model = Model(inputs=[observation_input], outputs=[xout])
+x = Dense(nb_actions)(x)
+x = Activation('linear')(x)
+model = Model(inputs=[observation_input], outputs=[x])
 
 memory = SequentialMemory(limit=50000, window_length=1)
 policy = BoltzmannQPolicy()
@@ -104,7 +109,7 @@ dqn.compile(Adam(lr=1e-4), metrics=['mae'])
 # Ctrl + C.
 
 history = dqn.learning(env, Given_policy, policy_list, nb_steps=5e6, visualize=False, log_interval=1000, verbose=2,
-                             nb_max_episode_steps=2000, imitation_leaning_time=1e16, reinforcement_learning_time=0)
+                             nb_max_episode_steps=2000, imitation_leaning_time=0, reinforcement_learning_time=1e10)
 sio.savemat(ENV_NAME+'-'+nowtime+'/fit.mat', history.history)
 # After training is done, we save the final weights.
 dqn.save_weights(ENV_NAME+'-'+nowtime+'/fit-weights.h5f', overwrite=True)

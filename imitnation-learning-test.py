@@ -18,7 +18,7 @@ updata:
 '''
 policy part
 '''
-policy_list = ['maxG', 'minSNR', 'random', 'cline']
+policy_list = ['maxG', 'minSNR', 'cline']
 def policy(env, policy, now):
     dx = env.SPplacex
     dy = env.SPplacey
@@ -70,12 +70,19 @@ x = Dense(128,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(flattened_observation)
 x = Activation('relu')(x)
+x = Dense(128,
+          kernel_regularizer=regularizers.l2(0.01),
+          bias_regularizer=regularizers.l2(0.01))(flattened_observation)
+x = Activation('relu')(x)
 # x = BatchNormalization()(x)
 x = Dense(64,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(x)
 x = Activation('relu')(x)
 # x = BatchNormalization()(x)
+x = Dense(32,
+          kernel_regularizer=regularizers.l2(1),
+          bias_regularizer=regularizers.l2(1))(x)
 x = Dense(32,
           kernel_regularizer=regularizers.l2(1),
           bias_regularizer=regularizers.l2(1))(x)
@@ -96,12 +103,19 @@ x = Dense(128,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(x)
 x = Activation('relu')(x)
+x = Dense(128,
+          kernel_regularizer=regularizers.l2(0.01),
+          bias_regularizer=regularizers.l2(0.01))(x)
+x = Activation('relu')(x)
 # x = BatchNormalization()(x)
 x = Dense(64,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(x)
 x = Activation('relu')(x)
 # x = BatchNormalization()(x)
+x = Dense(32,
+          kernel_regularizer=regularizers.l2(0.01),
+          bias_regularizer=regularizers.l2(0.01))(x)
 x = Dense(32,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(x)
@@ -141,7 +155,7 @@ if not os.path.exists(ENV_NAME+'-'+nowtime):
 '''65
 load weight
 '''
-agent.load_weights('fit-weights.h5f')
+# agent.load_weights('fit-weights.h5f')
 '''
 fit 
 '''

@@ -7,7 +7,7 @@ import sys
 import csv
 
 
-ENV_NAME = 'uav-dis-2d-v0'
+ENV_NAME = 'discrete-action-uav-stable-2d-v0'
 # Get the environment and extract the number of actions.
 env = gym.make(ENV_NAME)
 ###########################3
