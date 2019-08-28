@@ -1,7 +1,7 @@
 % for 2d - 3v
-    
 % load('fit.mat')
-ep=find(episode==1290);
+max(episode)
+ep=find(episode==5000);
 
 x= observation(ep,16);
 y= observation(ep,17);
@@ -41,11 +41,10 @@ subplot(2,2,3)
 hold on
 plot(1:length(ep),action(ep),'k')
 plot(1:length(ep),action(ep),'r')
-title('speed')
+title('acclecation')
 
 subplot(2,2,4)
 hold on
 plot(1:length(ep),reward(ep),'k')
-
-title('speed')
+title('reward')
 

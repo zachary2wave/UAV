@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import warnings
 from copy import deepcopy
-
+import matplotlib.pyplot as plt
 import numpy as np
 from keras.callbacks import History
 
@@ -294,8 +294,8 @@ class Agent(object):
 
         if verbose >= 1:
             callbacks += [TestLogger()]
-        if visualize:
-            callbacks += [Visualizer()]
+        # if visualize:
+        #     callbacks += [Visualizer()]
         history = History()
         callbacks += [history]
         callbacks = CallbackList(callbacks)
@@ -322,6 +322,8 @@ class Agent(object):
             # Obtain the initial observation by resetting the environment.
             self.reset_states()
             observation = deepcopy(env.reset())
+            tarx = []
+            tary = []
             if self.processor is not None:
                 observation = self.processor.process_observation(observation)
             assert observation is not None
@@ -338,6 +340,24 @@ class Agent(object):
                     action = self.processor.process_action(action)
                 callbacks.on_action_begin(action)
                 observation, r, done, info = env.step(action)
+                if visualize:
+                    print(reward)
+                    plt.cla()
+                    intG = [str(int(x)) for x in env.G]
+                    tarx.append(observation[15])
+                    tary.append(observation[16])
+                    plt.scatter(tarx, tary, c='r')
+                    plt.scatter(env.SPplacex, env.SPplacey)
+                    plt.plot([env.placex, env.SPplacex[env.cline]], [env.placey, env.SPplacey[env.cline]],
+                             '--')
+                    plt.text(env.SPplacex[0], env.SPplacey[0], str(0) + '-G=' + intG[0])
+                    plt.text(env.SPplacex[1], env.SPplacey[1], str(1) + '-G=' + intG[1])
+                    plt.text(env.SPplacex[2], env.SPplacey[2], str(2) + '-G=' + intG[2])
+                    plt.text(env.SPplacex[3], env.SPplacey[3], str(3) + '-G=' + intG[3])
+                    plt.text(env.SPplacex[4], env.SPplacey[4], str(4) + '-G=' + intG[4])
+                    plt.xlim(-400, 400)
+                    plt.ylim(-400, 400)
+                    plt.pause(0.00001)
                 observation = deepcopy(observation)
                 if self.processor is not None:
                     observation, r, done, info = self.processor.process_step(observation, r, done, info)
@@ -558,8 +578,8 @@ class Agent(object):
             callbacks += [TrainIntervalLogger(interval=log_interval)]
         elif verbose > 1:
             callbacks += [TrainEpisodeLogger()]
-        if visualize:
-            callbacks += [Visualizer()]
+        # if visualize:
+        #     callbacks += [Visualizer()]
         history = History()
         callbacks += [history]
         callbacks = CallbackList(callbacks)
@@ -593,7 +613,7 @@ class Agent(object):
         ILtime = 1
         Learning_flag = 0 # when Learning_flag==0 IL when Learning_flag == 1 RL
         IMLtime =0        # Imition Learning time
-        IMLtimemax = 2    # Max Imition Learning time
+        IMLtimemax = 5    # Max Imition Learning time
         try:
             while self.step < nb_steps:
                 '''
@@ -637,7 +657,10 @@ class Agent(object):
                         print('Reinforcement Learning End, Start to Imitation Learning')
                         ILtime = 0
                         RLtime = 0
-                if observation is None:  # start of a new episode
+                if observation is None:
+                    tarx = []
+                    tary = []
+                    # start of a new episode
                     callbacks.on_episode_begin(episode)
                     episode_step = np.int16(0)
                     episode_reward = np.float32(0)
@@ -714,6 +737,26 @@ class Agent(object):
                         accumulated_info[key] += value
                     callbacks.on_action_end(action)
                     reward += r
+
+                    if visualize:
+                        print(reward)
+                        plt.cla()
+                        intG = [str(int(x)) for x in env.G]
+                        tarx.append(observation[15])
+                        tary.append(observation[16])
+                        plt.scatter(tarx, tary, c='r')
+                        plt.scatter(env.SPplacex, env.SPplacey)
+                        plt.plot([env.placex, env.SPplacex[env.cline]], [env.placey, env.SPplacey[env.cline]],
+                                       '--')
+                        plt.text(env.SPplacex[0], env.SPplacey[0], str(0) + '-G=' + intG[0])
+                        plt.text(env.SPplacex[1], env.SPplacey[1], str(1) + '-G=' + intG[1])
+                        plt.text(env.SPplacex[2], env.SPplacey[2], str(2) + '-G=' + intG[2])
+                        plt.text(env.SPplacex[3], env.SPplacey[3], str(3) + '-G=' + intG[3])
+                        plt.text(env.SPplacex[4], env.SPplacey[4], str(4) + '-G=' + intG[4])
+                        plt.xlim(-400, 400)
+                        plt.ylim(-400, 400)
+                        plt.pause(0.00001)
+
                     if done:
                         break
                 if nb_max_episode_steps and episode_step >= nb_max_episode_steps - 1:

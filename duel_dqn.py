@@ -16,9 +16,8 @@ from rl.memory import SequentialMemory
 
 import tensorflow as tf
 nowtime = time.strftime("%y_%m_%d_%H",time.localtime())
-ENV_NAME = 'discrete-action-uav-dynamical-2d-v0'
+ENV_NAME = 'uav-D2Ddy-v0'
 # ENV_NAME = 'discrete-action-uav-stable-2d-v0'
-
 if not os.path.exists(ENV_NAME+'-'+nowtime):
     os.mkdir(ENV_NAME+'-'+nowtime)
 
@@ -81,6 +80,14 @@ x = Dense(512,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(flattened_observation)
 x = Activation('relu')(x)
+x = Dense(512,
+          kernel_regularizer=regularizers.l2(0.01),
+          bias_regularizer=regularizers.l2(0.01))(flattened_observation)
+x = Activation('relu')(x)
+x = Dense(512,
+          kernel_regularizer=regularizers.l2(0.01),
+          bias_regularizer=regularizers.l2(0.01))(flattened_observation)
+x = Activation('relu')(x)
 x = Dense(256,
           kernel_regularizer=regularizers.l2(0.01),
           bias_regularizer=regularizers.l2(0.01))(flattened_observation)
@@ -99,21 +106,22 @@ model = Model(inputs=[observation_input], outputs=[x])
 
 memory = SequentialMemory(limit=50000, window_length=1)
 policy = BoltzmannQPolicy()
-# enable the dueling network
+# enable the dueling networ
 # you can specify the dueling_type to one of {'avg','max','naive'}
 dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=100,
-               enable_dueling_network=True, dueling_type='avg', target_model_update=1e-2, policy=policy)
+               enable_dueling_network=True, dueling_type='avg', target_model_update=1e-3, policy=policy)
 dqn.compile(Adam(lr=1e-4), metrics=['mae'])
 # Okay, now it's time to learn something! We visualize the training here for show, but this
 # slows down training quite a lot. You can always safely abort the training prematurely using
 # Ctrl + C.
 
 history = dqn.learning(env, Given_policy, policy_list, nb_steps=5e6, visualize=False, log_interval=1000, verbose=2,
-                             nb_max_episode_steps=2000, imitation_leaning_time=0, reinforcement_learning_time=1e10)
+                             nb_max_episode_steps=1000, imitation_leaning_time=0, reinforcement_learning_time=1e10)
 sio.savemat(ENV_NAME+'-'+nowtime+'/fit.mat', history.history)
 # After training is done, we save the final weights.
+
 dqn.save_weights(ENV_NAME+'-'+nowtime+'/fit-weights.h5f', overwrite=True)
 
 # Finally, evaluate our algorithm for 5 episodes.
-history = dqn.test(env, nb_episodes=5, visualize=False,nb_max_episode_steps=2000)
+history = dqn.test(env, nb_episodes=10, visualize=True, nb_max_episode_steps=5000)
 sio.savemat(ENV_NAME+'-'+nowtime+'/test.mat', history.history)

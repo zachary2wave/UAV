@@ -294,7 +294,7 @@ class TrainIntervalLogger(Callback):
     def on_episode_end(self, episode, logs):
         """ Update reward value at the end of each episode """
         self.episode_rewards.append(logs['episode_reward'])
-        self.episode_basic_data.append(logs['episode_basic_data'])
+        # self.episode_basic_data.append(logs['episode_basic_data'])
 
 class FileLogger(Callback):
     def __init__(self, filepath, interval=None):
